@@ -1,0 +1,16 @@
+# most important commands (stop from running via Ctrl+C in terminal)
+# run these in separate terminals)
+
+# Terminal 1: Run FastAPI (Port 8000):
+
+cd ~/Desktop/Zeitgeist
+source .venv/bin/activate
+uvicorn backend.server:app --reload
+
+# Terminal 2: Run Static HTML Server (Port 8004)
+
+cd ~/Desktop/Zeitgeist
+python3 -m http.server 8004
+
+# actual website is at:
+http://127.0.0.1:8004/dashboard.html

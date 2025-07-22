@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Trend Dashboard</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background: #f5f5f5;
+      padding: 20px;
+      margin: 0;
+    }
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 30px;
+    }
+    h1 {
+      margin: 0;
+      font-size: 1.8em;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .user-info {
+      font-size: 0.9em;
+      color: #555;
+      text-align: right;
+    }
+    .user-info button {
+      margin-top: 5px;
+      padding: 6px 10px;
+      font-size: 0.8em;
+      background: #e74c3c;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+    .trend-list {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+      gap: 20px;
+    }
+    .trend-card {
+      background: #fff;
+      padding: 20px;
+      border-radius: 12px;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.05);
+      transition: 0.2s ease;
+    }
+    .trend-card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 16px rgba(0,0,0,0.1);
+    }
+    .hashtags {
+      color: #777;
+      font-size: 0.95em;
+    }
+    .platform {
+      font-weight: bold;
+      margin-top: 10px;
+    }
+    .stats, .summary, .suggestion {
+      margin-top: 10px;
+      font-size: 0.9em;
+      color: #444;
+    }
+    .suggestion {
+      background: #eef9f0;
+      padding: 10px;
+      border-radius: 6px;
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <h1>📊 Trending Now</h1>
+    <div class="user-info" id="user-info"></div>
+  </header>
+
+  <div class="trend-list" id="trend-list"></div>
+
+  <script>
+    const user = JSON.parse(localStorage.getItem("zeitgeist_user"));
+    if (!user) {
+      window.location.href = "login.html";
+    } else {
+      document.getElementById("user-info").innerHTML = `
+        Logged in as:<br>${user.name} (${user.email})
+        <br>
+        <button onclick="logout()">Log Out</button>
+      `;
+    }
+
+    function logout() {
+      localStorage.removeItem("zeitgeist_user");
+      window.location.href = "login.html";
+    }
+
+    fetch(`http://127.0.0.1:8000/trends/enhanced?business_type=${encodeURIComponent(user.business_type)}`)
+      .then(res => res.json())
+      .then(trends => {
+        const container = document.getElementById("trend-list");
+        trends.forEach(trend => {
+          const card = document.createElement("div");
+          card.className = "trend-card";
+          card.innerHTML = `
+            <h2>${trend.title}</h2>
+            <p class="hashtags">${trend.hashtags.join(' ')}</p>
+            <p class="platform">📱 ${trend.platform}</p>
+            <p class="stats">👀 Views Today: ${trend.views_today.toLocaleString()}</p>
+            <p class="stats">⏱️ Views/Hour: ${trend.views_per_hour.toLocaleString()}</p>
+            <p class="summary"><strong>LLM Summary:</strong> ${trend.llm_summary}</p>
+            <p class="suggestion"><strong>Suggestion:</strong> ${trend.reuse_suggestion}</p>
+          `;
+          container.appendChild(card);
+        });
+      })
+      .catch(err => {
+        console.error("Failed to fetch trends:", err);
+      });
+  </script>
+
+</body>
+</html>
